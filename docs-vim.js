@@ -1,5 +1,11 @@
-const useQWERTY = false;
+const useQWERTY = true;
+const enableEscapseSequence = true;
 const directionalKeys = useQWERTY ? "hjkl" : "dhtn";
+
+ styles = { 
+    "cursorWidth": "8px", 
+    "insertCursorWidth": "2px",
+}
 
 vim = {
     "mode": "insert", // Keep track of current mode
@@ -11,7 +17,6 @@ vim = {
         "x": [["Delete"]],
         "b": [["ArrowLeft", true]], // ctrl + <-
         "e": [["ArrowRight", true]], // ctrl + ->
-        // w is same behavior as eeb
         "w": [["ArrowRight", true], ["ArrowRight", true], ["ArrowLeft", true]],
         "a": [["ArrowRight"]],
         "A": [["ArrowDown", true]],
@@ -19,9 +24,13 @@ vim = {
         "$": [["ArrowDown", true]],
         "0": [["ArrowUp", true]],
         "o": [["ArrowDown", true], ["Enter"]],
-        "O": [["ArrowUp", true], ["ArrowLeft"], ["Enter"]]
+        "O": [["ArrowUp", true], ["ArrowLeft"], ["Enter"]],
+        "}": [["ArrowDown", true]],
+        "{": [["ArrowUp", true]],
     },
-    "needsInsert": ["a", "A", "I", "o", "O"]
+    "needsInsert": ["a", "A", "I", "o", "O"],
+    "enableEscapseSequence": enableEscapseSequence,
+    "styles": styles,
 };
 
 vim.keyMaps[directionalKeys[0]] = [["ArrowLeft"]];
@@ -40,21 +49,21 @@ vim.switchToNormalMode = function () {
     vim.currentSequence = "";
     vim.mode = "normal";
     vim.num = "";
-    docs.setCursorWidth("7px");
+    docs.setCursorWidth(vim.styles.cursorWidth);
 };
 
 vim.switchToVisualMode = function () {
     vim.currentSequence = "";
     vim.mode = "visual";
     vim.num = "";
-    docs.setCursorWidth("7px");
+    docs.setCursorWidth(vim.styles.cursorWidth);
 };
 
 vim.switchToInsertMode = function () {
     vim.currentSequence = "";
     vim.mode = "insert";
     vim.num = "";
-    docs.setCursorWidth("2px");
+    docs.setCursorWidth(vim.styles.insertCursorWidth);
 };
 
 // Called in normal mode.
@@ -110,7 +119,7 @@ vim.visual_keydown = function (e) {
     }
 
     vim.currentSequence += e.key;
-    if (vim.currentSequence == vim.escapeSequence) {
+    if (vim.currentSequence == vim.escapeSequence && vim.enableEscapseSequence) {
         e.preventDefault();
         e.stopPropagation();
 
@@ -124,7 +133,7 @@ vim.visual_keydown = function (e) {
     e.preventDefault();
     e.stopPropagation();
 
-    if (e.key.match(/\d+/)) {
+    if (e.key.match(/\d+/) && (vim.num != "" && e.key == "0")) {
         vim.num += e.key.toString();
     }
 
@@ -154,7 +163,7 @@ vim.insert_keydown = function (e) {
     }
 
     vim.currentSequence += e.key;
-    if (vim.currentSequence == vim.escapeSequence) {
+    if (vim.currentSequence == vim.escapeSequence && vim.enableEscapseSequence) {
         e.preventDefault();
         e.stopPropagation();
 
